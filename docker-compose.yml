@@ -22,6 +22,7 @@ services:
     build: ./env/fpm7/
     restart: always
     volumes:
+     - ./www:/var/www
      - /srv:/srv
      - /tmp:/tmp
     links:
@@ -39,6 +40,7 @@ services:
     volumes:
     - ./env/nginx.conf.d:/etc/nginx/conf.d
     - ./env/nginx.certs:/etc/nginx/certs
+    - ./www:/var/www
     - /srv:/srv
     - /tmp:/tmp
     dns:
@@ -53,6 +55,8 @@ services:
     image: million12/varnish:latest
     ports:
     - 80:80/tcp    
+    volumes:
+    - ./env/varnish.vcl:/etc/varnish/default.vcl
     networks:
       main:
         aliases:
