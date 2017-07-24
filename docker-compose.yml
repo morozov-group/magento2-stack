@@ -4,20 +4,31 @@ services:
   sessions:
     restart: always
     image: redis:latest
+    networks:
+      default:
+        aliases:
+          - sessions
   redis:
     restart: always
     image: redis:latest
-
+    networks:
+      default:
+        aliases:
+          - redis
   mysql:
     image: percona:5.7
     volumes:
       - ./dbdata:/var/lib/mysql
+      - ./env/mysql.custom.conf:/etc/mysql/conf.d/custom.cnf
     environment:
       - MYSQL_ROOT_PASSWORD=magento2
       - MYSQL_DATABASE=magento2
       - MYSQL_USER=magento2
       - MYSQL_PASSWORD=magento2
-
+    networks:
+      default:
+        aliases:
+          - mysql
   php7fpm:
     build: ./env/fpm7/
     restart: always
@@ -25,18 +36,19 @@ services:
      - ./www:/var/www
      - /srv:/srv
      - /tmp:/tmp
-    links:
-     - mysql:mysql
-     - redis:redis
-     - sessions:sessions
     networks:
       main:
         aliases:
           - php7fpm
+      default:
+        aliases:
+          - php
 
   nginx:
     restart: always
     image: nginx:latest
+    depends_on:
+    - "php7fpm"
     volumes:
     - ./env/nginx.conf.d:/etc/nginx/conf.d
     - ./env/nginx.certs:/etc/nginx/certs
@@ -53,6 +65,8 @@ services:
   gateway:
     restart: always
     image: million12/varnish:latest
+    depends_on:
+    - "nginx"
     ports:
     - 80:80/tcp    
     volumes:
