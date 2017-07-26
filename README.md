@@ -13,3 +13,6 @@ docker-compose up -d
 ```
 
 #### Destroy environment and keep data
+```
+docker-compose down
+```
